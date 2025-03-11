@@ -7,6 +7,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        farmGreen: {
+          700: "#2F855A", // Dark green for text/buttons
+          800: "#276749", // Darker green for backgrounds
+          900: "#1A4731", // Deep green for footer
+        },
+        farmGray: {
+          100: "#F7FAFC", // Light gray for page background
+          200: "#EDF2F7", // Slightly darker gray for sections
+          600: "#4A5568", // Medium gray for text
+        },
         'fore-background': '#E8E8E8',
         'main-background': '#FFFFFF',
         'gray-light': '#EAECF0',

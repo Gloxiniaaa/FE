@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import farmImage from "../assets/images/grape-farm.png"; // Placeholder for hero image
 import wateringIcon from "../assets/images/watering-icon.png"; // Placeholder for watering icon
 import lightIcon from "../assets/images/light-icon.png"; // Placeholder for light icon
@@ -10,7 +11,7 @@ const FeatureCard = ({ icon, title, description }) => {
     <div className="bg-white p-6 rounded-lg shadow-md flex items-center">
       <img src={icon} alt={`${title} Icon`} className="w-16 h-16 mr-4" />
       <div>
-        <h3 className="text-xl font-bold text-green-700">{title}</h3>
+        <h3 className="text-xl font-bold text-farmGreen-700">{title}</h3>
         <p className="text-gray-600">{description}</p>
       </div>
     </div>
@@ -20,8 +21,44 @@ const FeatureCard = ({ icon, title, description }) => {
 const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
+      {/* Navigation Bar */}
+      <nav className="bg-farmGreen-800 text-white py-4 px-8 flex justify-between items-center">
+        <div className="text-2xl font-bold">
+          <Link to="/">FARMGENIUS GRAPEGROW</Link>
+        </div>
+        <ul className="flex space-x-6">
+          <li>
+            <Link
+              to="/"
+              className="hover:text-farmGray-100 transition-colors duration-200"
+            >
+              Home
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/dashboard"
+              className="hover:text-farmGray-100 transition-colors duration-200"
+            >
+              Dashboard
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/login"
+              className="hover:text-farmGray-100 transition-colors duration-200"
+            >
+              Login
+            </Link>
+          </li>
+          
+        </ul>
+      </nav>
+
       {/* Hero Section */}
-      <section className="relative bg-green-900 text-white">
+      <section className="relative bg-farmGreen-900 text-white">
         <img
           src={farmImage}
           alt="Grape Farm"
