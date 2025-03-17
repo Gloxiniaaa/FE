@@ -21,42 +21,6 @@ const FeatureCard = ({ icon, title, description }) => {
 const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
-      {/* Navigation Bar */}
-      <nav className="bg-farmGreen-800 text-white py-4 px-8 flex justify-between items-center">
-        <div className="text-2xl font-bold">
-          <Link to="/">FARMGENIUS GRAPEGROW</Link>
-        </div>
-        <ul className="flex space-x-6">
-          <li>
-            <Link
-              to="/"
-              className="hover:text-farmGray-100 transition-colors duration-200"
-            >
-              Home
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              to="/dashboard"
-              className="hover:text-farmGray-100 transition-colors duration-200"
-            >
-              Dashboard
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              to="/login"
-              className="hover:text-farmGray-100 transition-colors duration-200"
-            >
-              Login
-            </Link>
-          </li>
-          
-        </ul>
-      </nav>
-
       {/* Hero Section */}
       <section className="relative bg-farmGreen-900 text-white">
         <img
@@ -74,10 +38,20 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Start Now Button */}
+      <div className="text-center py-8">
+        <Link
+          to="/login"
+          className="inline-block bg-farmGreen-700 text-white py-4 px-10 rounded-lg text-2xl hover:bg-farmGreen-900 transition-colors duration-200"
+        >
+          Start Now
+        </Link>
+      </div>
+
       {/* Features Section */}
-      <section className="py-16 px-8 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-semibold text-gray-800 text-center mb-12">
-          Monitor Your Farm Effortlessly
+      <section className="pb-8 px-8 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-semibold text-gray-800 text-center mb-4">
+          Monitor Your Farm Effortlessly With
         </h2>
         <div className="grid grid-cols-3 gap-8">
           <FeatureCard
