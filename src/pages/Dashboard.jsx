@@ -60,12 +60,20 @@ const Dashboard = () => {
               <p className="text-3xl font-bold text-farmGreen-700">
                 {sensorData.temperature} °C
               </p>
+              <div className="text-sm font-medium text-farmGray-600">
+                optimal range: 18-30 °C
+              </div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-medium text-farmGray-600">Humidity</h3>
+              <h3 className="text-lg font-medium text-farmGray-600">
+                Humidity
+              </h3>
               <p className="text-3xl font-bold text-farmGreen-700">
                 {sensorData.humidity} %
               </p>
+              <div className="text-sm font-medium text-farmGray-600">
+                optimal range: 40-80 %
+              </div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-medium text-farmGray-600">
@@ -74,6 +82,9 @@ const Dashboard = () => {
               <p className="text-3xl font-bold text-farmGreen-700">
                 {sensorData.soilMoisture} %
               </p>
+              <div className="text-sm font-medium text-farmGray-600">
+                optimal range: 30-70 %
+              </div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-medium text-farmGray-600">
@@ -82,6 +93,9 @@ const Dashboard = () => {
               <p className="text-3xl font-bold text-farmGreen-700">
                 {sensorData.light} lux
               </p>
+              <div className="text-sm font-medium text-farmGray-600">
+                optimal range: 500-1500 lux
+              </div>
             </div>
           </div>
         </section>
