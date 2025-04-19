@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/layout/Footer";
 import NavigationBar from "../components/layout/NavigationBar";
@@ -19,9 +19,9 @@ const Dashboard = () => {
   }, [navigate]);
 
   const FEED_MAP = {
-    'farmgenius-grapegrow.bbc-temp': 'temperature',
+    'farmgenius-grapegrow.bbc-temp': 'temp',
     'farmgenius-grapegrow.bbc-humidity': 'humidity',
-    'farmgenius-grapegrow.bbc-soil': 'soilMoisture',
+    'farmgenius-grapegrow.bbc-soil': 'soil',
     'farmgenius-grapegrow.bbc-light': 'light',
     'farmgenius-grapegrow.bbc-pump': 'pump',
     'farmgenius-grapegrow.bbc-led': 'led',
@@ -51,6 +51,18 @@ const Dashboard = () => {
   const [pumpIntensity, setPumpIntensity] = useState(35); // PumpPump intensity (0-100%)
   const [graphData, setGraphData] = useState([]);
   const [notifications, setNotifications] = useState([]);
+
+  const pumpRef = useRef(pumpIntensity);
+  const ledRef = useRef(lightIntensity);
+
+  useEffect(() => {
+    pumpRef.current = pumpIntensity;
+  }, [pumpIntensity]);
+
+  useEffect(() => {
+    ledRef.current = lightIntensity;
+  }, [lightIntensity]);
+
 
   const sendLevelToBackend = async (deviceType, level) => {
     try {
@@ -90,7 +102,7 @@ const Dashboard = () => {
         },
         body: JSON.stringify({
           device: deviceType,
-          level: newStatus ? intensity : 0, // level = 0 nếu OFF
+          level: newStatus ? intensity : 0,
         }),
       });
     } catch (error) {
@@ -133,7 +145,7 @@ const Dashboard = () => {
       };
     } catch (err) {
       console.error(`Lỗi khi lấy limit cho ${device}:`, err);
-      return { limit_up: "", limit_down: "" }; // fallback an toàn
+      return { limit_up: "", limit_down: "" };
     }
   };
   
@@ -178,13 +190,28 @@ const Dashboard = () => {
       console.log('Socket connected in Dashboard');
     });
 
-    socket.on('new-data', ({ feed, value }) => {
+    socket.on('new-data', async ({ feed, value }) => {
       const key = FEED_MAP[feed];
       if (key) {
         setSensorData((prev) => ({
           ...prev,
           [key]: value,
         }));
+
+        if (key === "pump" && value !== pumpRef.current) {
+          setPumpStatus(value > 0);
+          setPumpIntensity(value);
+          pumpRef.current = value;
+          sendLevelToBackend("pump", value);
+        }
+      
+        if (key === "led" && value !== ledRef.current) {
+          setLightStatus(value > 0);
+          setLightIntensity(value);
+          ledRef.current = value;
+          sendLevelToBackend("led", value);
+        }
+
       }
     });
 
@@ -318,7 +345,31 @@ const Dashboard = () => {
               onSave={() => handleSendLimit("light")}
             />
           </div>
-
+        </section>
+        {/* Notifications Placeholder */}
+        <section className="max-w-6xl mx-auto mb-12">
+          <h2 className="text-2xl font-semibold text-farmGreen-700 mb-4">
+            Notifications
+          </h2>
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            {notifications.length === 0 ? (
+              <p>Không có thông báo nào.</p>
+            ) : (
+              <ul className="space-y-3">
+                {notifications.map((notification, index) => (
+                  <li key={index} className="p-3 rounded bg-gray-100 shadow">
+                    {notification.noti ? (
+                      <p>{notification.noti}</p>
+                    ) : (
+                      <p>
+                        <strong>Feed:</strong> {notification.feed}, <strong>Value:</strong> {notification.value}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
 
         {/* Device Control */}
@@ -433,32 +484,6 @@ const Dashboard = () => {
           </h2>
           <div className="bg-white p-6 rounded-lg shadow-md text-center">
             <Graph data={graphData} />
-          </div>
-        </section>
-
-        {/* Notifications Placeholder */}
-        <section className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-semibold text-farmGreen-700 mb-4">
-            Notifications
-          </h2>
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            {notifications.length === 0 ? (
-              <p>Không có thông báo nào.</p>
-            ) : (
-              <ul className="space-y-3">
-                {notifications.map((notification, index) => (
-                  <li key={index} className="p-3 rounded bg-gray-100 shadow">
-                    {notification.noti ? (
-                      <p>{notification.noti}</p>
-                    ) : (
-                      <p>
-                        <strong>Feed:</strong> {notification.feed}, <strong>Value:</strong> {notification.value}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
         </section>
       </div>
