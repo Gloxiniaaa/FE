@@ -1,10 +1,12 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
 import farmImage from "../assets/images/grape-farm.png"; // Placeholder for hero image
 import wateringIcon from "../assets/images/watering-icon.png"; // Placeholder for watering icon
 import lightIcon from "../assets/images/light-icon.png"; // Placeholder for light icon
 import sensorIcon from "../assets/images/sensor-icon.png"; // Placeholder for sensor icon
 import Footer from "../components/layout/Footer";
+import { io } from 'socket.io-client';
+import { toast } from 'react-toastify';
 
 const FeatureCard = ({ icon, title, description }) => {
   return (
@@ -19,6 +21,74 @@ const FeatureCard = ({ icon, title, description }) => {
 };
 
 const Home = () => {
+  const FEED_MAP = {
+    'farmgenius-grapegrow.bbc-temp': 'temperature',
+    'farmgenius-grapegrow.bbc-humidity': 'humidity',
+    'farmgenius-grapegrow.bbc-soil': 'soilMoisture',
+    'farmgenius-grapegrow.bbc-light': 'light',
+    'farmgenius-grapegrow.bbc-pump': 'pump',
+    'farmgenius-grapegrow.bbc-led': 'led',
+  };
+  
+  const navigate = useNavigate();
+  const [data, setData] = useState({});
+
+  const handleStartNow = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard");
+    } else {
+      navigate("/login");
+    }
+  };
+  
+  useEffect(() => {
+    const socket = io('http://localhost:3000');
+    socket.on('connect', () => {
+      console.log('Socket connected in Home');
+    });
+
+    socket.on('new-data', ({ feed, value }) => {
+      const key = FEED_MAP[feed];
+      if (key) {
+        setData((prev) => ({
+          ...prev,
+          [key]: value,
+        }));
+      }
+    });
+
+    socket.on('notification', (payload) => {
+      let message = '';
+      if (payload.noti) {
+        message = payload.noti;
+      } else if (payload.feed && payload.value !== undefined) {
+        const key = FEED_MAP[payload.feed] || payload.feed;
+        message = `⚠️ ${key} = ${payload.value} vượt giới hạn!`;
+      }
+
+      if (message) {
+        toast.warning(message, {
+          position: 'top-right',
+          autoClose: 5000,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected in Home');
+    });
+
+    // Clean up the socket connection
+    return () => {
+      socket.off('new-data');
+      socket.off('notification');
+      socket.disconnect();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
       {/* Hero Section */}
@@ -40,12 +110,12 @@ const Home = () => {
 
       {/* Start Now Button */}
       <div className="text-center py-8">
-        <Link
-          to="/login"
+        <button
+          onClick={handleStartNow}
           className="inline-block bg-farmGreen-700 text-white py-4 px-10 rounded-lg text-2xl hover:bg-farmGreen-900 transition-colors duration-200"
         >
           Start Now
-        </Link>
+        </button>
       </div>
 
       {/* Features Section */}
@@ -81,11 +151,14 @@ const Home = () => {
           Get instant insights into your farm's performance with our intuitive
           dashboard, updated with real-time data from your hardware.
         </p>
-        <div className="bg-white p-4 rounded-lg shadow-lg inline-block">
-          <div className="w-[800px] h-[400px] bg-gray-300 flex items-center justify-center">
-            <span className="text-gray-500">
-              [Placeholder: Dashboard Screenshot]
-            </span>
+        <div className="bg-white p-6 rounded-lg shadow-lg inline-block w-[800px]">
+          <div className="grid grid-cols-3 gap-4 text-left">
+            {Object.entries(data).map(([key, value]) => (
+              <div key={key} className="p-4 bg-gray-100 rounded-lg">
+                <h4 className="text-lg font-semibold text-gray-700">{key}</h4>
+                <p className="text-2xl text-green-600">{value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

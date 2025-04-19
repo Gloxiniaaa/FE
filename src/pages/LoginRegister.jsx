@@ -1,25 +1,45 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/layout/Footer";
+import api from "../api/api"; // import ở đầu file
 
 const LoginRegister = () => {
-  // State to toggle between login and register forms
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Mock Google sign-in handler (replace with real implementation)
-  const handleGoogleSignIn = () => {
-    console.log("Sign in with Google clicked!");
-    // Add Firebase/Google Auth logic here later
-  };
-
-  // Form submission handlers (placeholders)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
-    console.log(isLogin ? "Login data:" : "Register data:", data);
-    // Add real authentication logic here
+
+    const payload = {
+      username: data.email,
+      password: data.password,
+    };
+
+    try {
+      if (isLogin) {
+        const res = await api.post("/auth/login", payload);
+        const token = res.data.token;
+        localStorage.setItem("token", token);
+        alert("Đăng nhập thành công!");
+        navigate("/dashboard"); // hoặc chuyển hướng trang chính
+      } else {
+        await api.post("/auth/register", payload);
+        alert("Đăng ký thành công! Vui lòng đăng nhập.");
+        setIsLogin(true);
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Lỗi không xác định';
+      alert(`Thao tác thất bại: ${message}`);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-farmGray-100 flex flex-col">
@@ -40,7 +60,7 @@ const LoginRegister = () => {
 
           {/* Form */}
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {!isLogin && (
+            {/* {!isLogin && (
               <div>
                 <label
                   htmlFor="name"
@@ -57,7 +77,7 @@ const LoginRegister = () => {
                   placeholder="John Doe"
                 />
               </div>
-            )}
+            )} */}
             <div>
               <label
                 htmlFor="email"
@@ -94,13 +114,14 @@ const LoginRegister = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-farmGreen-700 text-white py-2 px-4 rounded-md hover:bg-farmGreen-900 transition-colors duration-200"
             >
-              {isLogin ? "Sign In" : "Register"}
+              {loading ? "Processing..." : isLogin ? "Sign In" : "Register"}
             </button>
           </form>
 
-          {/* Google Sign-In Button */}
+          {/* Google Sign-In Button
           <div className="mt-2">
             <button
               onClick={handleGoogleSignIn}
@@ -119,7 +140,7 @@ const LoginRegister = () => {
               </svg>
               Sign in with Google
             </button>
-          </div>
+          </div> */}
 
           {/* Toggle between Login and Register */}
           <div className="text-center text-sm">
