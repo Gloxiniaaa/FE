@@ -28,9 +28,9 @@ const Dashboard = () => {
   };
   
   const [sensorData, setSensorData] = useState({
-      temperature: 0,
+      temp: 0,
       humidity: 0,
-      soilMoisture: 0,
+      soil: 0,
       light: 0,
       pump: 0,
       led: 0,
@@ -216,6 +216,15 @@ const Dashboard = () => {
     });
 
     socket.on('notification', (payload) => {
+      const now = new Date().toLocaleString("vi-VN", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
       let message = '';
       if (payload.noti) {
         message = payload.noti;
@@ -236,6 +245,7 @@ const Dashboard = () => {
       setNotifications((prev) => [
         ...prev,
         {
+          time: now,
           noti: payload.noti,
           feed: payload.feed,
           value: payload.value,
@@ -306,7 +316,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <RealTimeMonitoring
               label="Temperature"
-              value={sensorData.temperature}
+              value={sensorData.temp}
               unit="°C"
               limit={limits.temp}
               onChange={(val) =>
@@ -326,7 +336,7 @@ const Dashboard = () => {
             />
             <RealTimeMonitoring
               label="Soil Moisture"
-              value={sensorData.soilMoisture}
+              value={sensorData.soil}
               unit="%"
               limit={limits.soil}
               onChange={(val) =>
@@ -357,7 +367,10 @@ const Dashboard = () => {
             ) : (
               <ul className="space-y-3">
                 {notifications.map((notification, index) => (
-                  <li key={index} className="p-3 rounded bg-gray-100 shadow">
+                  <li key={index} className="p-3 rounded bg-gray-100 shadow text-left">
+                    <p className="text-sm text-gray-500 mb-1">
+                      {notification.time}
+                    </p>
                     {notification.noti ? (
                       <p>{notification.noti}</p>
                     ) : (
