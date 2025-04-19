@@ -216,6 +216,9 @@ const Dashboard = () => {
     });
 
     socket.on('notification', (payload) => {
+      const hasContent = payload.noti?.trim() || (payload.feed && payload.value !== undefined);
+      if (!hasContent) return;
+
       const now = new Date().toLocaleString("vi-VN", {
         hour12: false,
         hour: "2-digit",
@@ -225,8 +228,11 @@ const Dashboard = () => {
         month: "2-digit",
         year: "numeric",
       });
+
       let message = '';
-      if (payload.noti) {
+      if (typeof payload === 'string') {
+        message = payload;
+      } else if (payload.noti) {
         message = payload.noti;
       } else if (payload.feed && payload.value !== undefined) {
         const key = FEED_MAP[payload.feed] || payload.feed;
@@ -246,7 +252,7 @@ const Dashboard = () => {
         ...prev,
         {
           time: now,
-          noti: payload.noti,
+          noti: typeof payload === 'string' ? payload : payload.noti,
           feed: payload.feed,
           value: payload.value,
         },
@@ -366,7 +372,7 @@ const Dashboard = () => {
               <p>Không có thông báo nào.</p>
             ) : (
               <ul className="space-y-3">
-                {notifications.map((notification, index) => (
+                {notifications.slice().reverse().map((notification, index) => (
                   <li key={index} className="p-3 rounded bg-gray-100 shadow text-left">
                     <p className="text-sm text-gray-500 mb-1">
                       {notification.time}

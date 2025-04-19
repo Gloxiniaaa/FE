@@ -22,12 +22,12 @@ const FeatureCard = ({ icon, title, description }) => {
 
 const Home = () => {
   const FEED_MAP = {
-    'farmgenius-grapegrow.bbc-temp': 'temperature',
-    'farmgenius-grapegrow.bbc-humidity': 'humidity',
-    'farmgenius-grapegrow.bbc-soil': 'soilMoisture',
-    'farmgenius-grapegrow.bbc-light': 'light',
-    'farmgenius-grapegrow.bbc-pump': 'pump',
-    'farmgenius-grapegrow.bbc-led': 'led',
+    'farmgenius-grapegrow.bbc-temp': 'Temperature',
+    'farmgenius-grapegrow.bbc-humidity': 'Humidity',
+    'farmgenius-grapegrow.bbc-soil': 'Soil Moisture',
+    'farmgenius-grapegrow.bbc-light': 'Light',
+    'farmgenius-grapegrow.bbc-pump': 'Pump',
+    'farmgenius-grapegrow.bbc-led': 'Led',
   };
   
   const navigate = useNavigate();
