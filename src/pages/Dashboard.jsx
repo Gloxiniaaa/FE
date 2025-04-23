@@ -216,9 +216,6 @@ const Dashboard = () => {
     });
 
     socket.on('notification', (payload) => {
-      const hasContent = payload.noti?.trim() || (payload.feed && payload.value !== undefined);
-      if (!hasContent) return;
-
       const now = new Date().toLocaleString("vi-VN", {
         hour12: false,
         hour: "2-digit",
@@ -248,15 +245,16 @@ const Dashboard = () => {
         });
       }
 
-      setNotifications((prev) => [
-        ...prev,
-        {
+      setNotifications((prev) => {
+        const newNotification = {
           time: now,
           noti: typeof payload === 'string' ? payload : payload.noti,
-          feed: payload.feed,
-          value: payload.value,
-        },
-      ]);
+          feed: typeof payload === 'object' ? payload.feed : undefined,
+          value: typeof payload === 'object' ? payload.value : undefined,
+        };
+      
+        return [newNotification, ...prev.slice(0, 14)];
+      });
     });
 
     socket.on('disconnect', () => {
@@ -372,7 +370,7 @@ const Dashboard = () => {
               <p>Không có thông báo nào.</p>
             ) : (
               <ul className="space-y-3">
-                {notifications.slice().reverse().map((notification, index) => (
+                {notifications.slice().map((notification, index) => (
                   <li key={index} className="p-3 rounded bg-gray-100 shadow text-left">
                     <p className="text-sm text-gray-500 mb-1">
                       {notification.time}
