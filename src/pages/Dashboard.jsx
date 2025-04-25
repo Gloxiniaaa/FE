@@ -5,6 +5,7 @@ import NavigationBar from "../components/layout/NavigationBar";
 import debounce from "lodash/debounce";
 import RealTimeMonitoring from "../components/layout/RealTimeMonitoring";
 import Graph from "../components/layout/Graph";
+import Table from "../components/layout/Table";
 import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -51,6 +52,16 @@ const Dashboard = () => {
   const [pumpIntensity, setPumpIntensity] = useState(35); // PumpPump intensity (0-100%)
   const [graphData, setGraphData] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Tính toán chỉ hiển thị thông báo cho trang hiện tại
+  const totalPages = Math.ceil(notifications.length / itemsPerPage);
+  const paginatedNotifications = notifications.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
 
   const pumpRef = useRef(pumpIntensity);
   const ledRef = useRef(lightIntensity);
@@ -177,6 +188,7 @@ const Dashboard = () => {
       if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu biểu đồ");
 
       const data = await res.json();
+      console.log(data)
       setGraphData(data);
     } catch (err) {
       console.error("Graph API error:", err);
@@ -253,7 +265,7 @@ const Dashboard = () => {
           value: typeof payload === 'object' ? payload.value : undefined,
         };
       
-        return [newNotification, ...prev.slice(0, 14)];
+        return [newNotification, ...prev.slice(0, 9)];
       });
     });
 
@@ -362,32 +374,52 @@ const Dashboard = () => {
         </section>
         {/* Notifications Placeholder */}
         <section className="max-w-6xl mx-auto mb-12">
-          <h2 className="text-2xl font-semibold text-farmGreen-700 mb-4">
-            Notifications
-          </h2>
+          <h2 className="text-2xl font-semibold text-farmGreen-700 mb-4">Notifications</h2>
           <div className="bg-white p-6 rounded-lg shadow-md text-center">
             {notifications.length === 0 ? (
               <p>Không có thông báo nào.</p>
             ) : (
-              <ul className="space-y-3">
-                {notifications.slice().map((notification, index) => (
-                  <li key={index} className="p-3 rounded bg-gray-100 shadow text-left">
-                    <p className="text-sm text-gray-500 mb-1">
-                      {notification.time}
-                    </p>
-                    {notification.noti ? (
-                      <p>{notification.noti}</p>
-                    ) : (
-                      <p>
-                        <strong>Feed:</strong> {notification.feed}, <strong>Value:</strong> {notification.value}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="space-y-3 mb-4">
+                  {paginatedNotifications.map((notification, index) => (
+                    <li key={index} className="p-3 rounded bg-gray-100 shadow text-left">
+                      <p className="text-sm text-gray-500 mb-1">{notification.time}</p>
+                      {notification.noti ? (
+                        <p>{notification.noti}</p>
+                      ) : (
+                        <p>
+                          <strong>Feed:</strong> {notification.feed}, <strong>Value:</strong> {notification.value}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Pagination Controls */}
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Trang trước
+                  </button>
+                  <span className="px-3 py-1 text-farmGreen-700 font-semibold">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Trang sau
+                  </button>
+                </div>
+              </>
             )}
           </div>
-        </section>
+</section>
+
 
         {/* Device Control */}
         <section className="max-w-6xl mx-auto mb-12">
@@ -501,6 +533,16 @@ const Dashboard = () => {
           </h2>
           <div className="bg-white p-6 rounded-lg shadow-md text-center">
             <Graph data={graphData} />
+          </div>
+        </section>
+
+        {/* Led and Pump History */}
+        <section className="max-w-6xl mx-auto mb-12">
+          <h2 className="text-2xl font-semibold text-farmGreen-700 mb-4">
+            Lịch sử hoạt động của Led và Pump
+          </h2>
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <Table data={graphData} />
           </div>
         </section>
       </div>
